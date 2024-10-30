@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -27,24 +30,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import org.greelando.composeroomlogin.model.StudentEntity
 import org.greelando.composeroomlogin.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     val viewModel = hiltViewModel<HomeViewModel>()
-    Content(homeViewModel = viewModel)
+    Content(homeViewModel = viewModel, navController)
 }
 
 @Composable
 fun Content(
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    navController: NavController
 ) {
 
     LaunchedEffect(key1 = true, block = {
@@ -73,7 +80,7 @@ fun Content(
             fontWeight = FontWeight.Bold
         )
 
-        BottomContent(homeViewModel = homeViewModel)
+        BottomContent(homeViewModel = homeViewModel, navController)
     }
 }
 
@@ -82,6 +89,16 @@ fun TopContent(
     homeViewModel: HomeViewModel,
 ) {
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.End,
+
+    ) {
+        NextButton()
+
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -102,6 +119,8 @@ fun TopContent(
         val onSubmit: (value: StudentEntity) -> Unit = remember {
             return@remember homeViewModel::insertStudent
         }
+
+
         OutlinedTextField(
             value = name,
             onValueChange = {
@@ -147,8 +166,30 @@ fun TopContent(
 }
 
 @Composable
+fun NextButton() {
+    val navController = rememberNavController()
+    Button(
+        onClick = {
+        },
+        elevation = ButtonDefaults.elevatedButtonElevation(
+        defaultElevation = 10.dp,
+        pressedElevation = 15.dp,
+        disabledElevation = 0.dp,
+    ),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White
+        ),
+        shape = CutCornerShape(10.dp)
+
+    ) {
+        Text(text = "Login", color = Color.Black)
+    }
+}
+
+@Composable
 fun BottomContent(
     homeViewModel: HomeViewModel,
+    navController: NavController
 ) {
 
     val contents by homeViewModel.studentDetailsList.collectAsStateWithLifecycle()
@@ -163,7 +204,7 @@ fun BottomContent(
 
             items(contents) {
                 val item = ImmutableStudent(it)
-                StudentCard(wrapper = item, homeViewModel = homeViewModel, mod = mod)
+                StudentCard(wrapper = item, homeViewModel = homeViewModel, navController = navController)
             }
         }, modifier = Modifier.fillMaxSize()
     )
@@ -177,7 +218,8 @@ data class ImmutableStudent(val studentEntity: StudentEntity)
 fun StudentCard(
     wrapper: ImmutableStudent,
     homeViewModel: HomeViewModel,
-    mod: Modifier,
+    navController: NavController,
+    mod: Modifier = Modifier,
 ) {
 
 
@@ -187,6 +229,7 @@ fun StudentCard(
     Card(
         onClick = {
 
+            navController.navigate("detail/${wrapper.studentEntity.id}")
         }, modifier = mod
     ) {
         Row(

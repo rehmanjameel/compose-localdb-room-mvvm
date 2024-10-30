@@ -12,21 +12,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 import org.greelando.composeroomlogin.ui.theme.ComposeRoomLoginTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
         setContent {
             ComposeRoomLoginTheme {
 
+                val navController = rememberNavController()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    HomeScreen()
+                    NavHost(navController = navController, startDestination = "home") {
+                        composable("home") {
+                            HomeScreen(navController)
+                        }
+                        composable("detail/{studentId}") { navBackStackEntry ->
+                            val studentId = navBackStackEntry.arguments?.getString("studentId")
+                            DetailScreen(studentId = studentId)
+
+                        }
+                    }
+//                    HomeScreen()
 
                 }
             }
